@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import binascii
 import os
+from posixpath import split
 import time
 import requests
 import json
@@ -14,11 +15,11 @@ class Coupang:
 
 #Coupang default value Access_ket and Secret_key and etc... 
     def __init__(self):
-        self.access_key = 'X' 
-        self.secret_key = 'X'
+        self.access_key = '' 
+        self.secret_key = ''
         self.subId = 'AF8339687' 
         self.method = 'GET' 
-        self.limit = '3'
+        self.limit = '10'
         self.DOMAIN = 'https://api-gateway.coupang.com' 
         
     def generateHmac(self, url): 
@@ -57,12 +58,54 @@ class Coupang:
 
     def create_data(self, contents):
         now_time = time.time()
-        tm = time.strftime('%Y-%m-%d_%I%M%S',time.localtime(now_time))
-        file_name = 'Data\\' + str(tm) + '.csv'
+        tm = time.strftime('%Y-%m-%d_%I-%M-%S',time.localtime(now_time))
+        file_name = 'Data\\' + str(tm) + '.json'
         
         with open(file_name,'w',encoding='utf-8') as f:
             f.write(contents)
         return 0
+
+class tstory : 
+
+    def __init__(self):
+        self.access_token = '' 
+
+    def twrite(self, contents):
+
+        URL = 'https://www.tistory.com/apis/post/write'
+        
+        now_time = time.time()
+
+        ty = time.strftime('%Y-%m-%d',time.localtime(now_time))
+
+        if contents["isRocket"] == 'True':
+            title = '[Coupang 로켓배송!](' + str(ty) + ' best ' + str(contents['rank']) + ') ' + contents["productName"] + ' ' + str(contents["productPrice"]) + '원!'
+        else:
+            title = '[Coupang](' + str(ty) + ' best ' + str(contents['rank']) + ') ' + contents["productName"] + ' ' + str(contents["productPrice"])  + '원!'
+
+        tag = contents['productName'].replace(' ',',') + ',' + contents['categoryName']
+
+        data = {
+                'access_token': self.access_token,
+                'blogName': 'revoltoso',
+                'title': title,
+                'visibility': '0',
+                'category' : '990829',
+                'content': 
+                '<h1>' + contents["productName"] + '</h1>' + '  ' + '<h2>' + str(contents["productPrice"]) + '원!!' + '</h2>' + '</br>' + '</br>' +
+                '<a href=\"' + contents['productUrl'] + '\">' + '<img src=\"' + contents['productImage'] + '\">' + '</a>' + '</br>' + '</br>' +
+                '<h2>' + contents["productName"] + '</h2>' + '</br>' + '</br>' +
+                '<h4>' + '파트너스 활동을 통해 일정액의 수수료를 제공받을 수 있음' + '</h4>',
+                
+                'tag': tag,
+        }
+        r = requests.post(URL, data=data)
+        print(r.text)
+        return 0
+"""  <a href="https://google.com">
+      <img class="img-concert" src="images/concert.jpg"/>
+  </a>"""
+
 
 ################### Categories ####################
 
@@ -92,12 +135,32 @@ category_list = ["1001","1010","1016","1017","1018","1019"]
 
 
 #/products/goldbox
-keyword_origin = '샤프'
-keyword = urllib.parse.quote(keyword_origin)
+#keyword_origin = '샤프'
+#keyword = urllib.parse.quote(keyword_origin)
 
-Id = "1001"
+
 #data = Coupang().search_coupang(keyword)
-data_str = Coupang().best_categories_coupang(Id)
+#data_ori = Coupang().best_categories_coupang(Id)
 #Coupang().goldbox_coupang()
-data_json = json.loads(data_str)
-Coupang().create_data(str(data_json['data']))
+#data_json = json.loads(data_ori)
+#print(str(data_json['data'][0]))
+#Coupang().create_data(str(data_json['data']))
+"""
+contents_main = {}
+for a in category_list:
+    contents_1 = []
+    data_ori = Coupang().best_categories_coupang(a)
+    data_json = json.loads(data_ori)
+    contents_main[a] = data_json['data']
+
+Coupang().create_data(str(contents_main))
+"""
+
+
+with open('Data\\sample.json','r', encoding='utf-8') as f:
+    contents_data = json.load(f) 
+f.close()
+
+for a in category_list:
+    for b in range(0, len(a)-1):
+        tstory().twrite(contents_data[a][b])
