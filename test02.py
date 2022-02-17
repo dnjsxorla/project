@@ -15,8 +15,8 @@ class Coupang:
 
 #Coupang default value Access_ket and Secret_key and etc... 
     def __init__(self):
-        self.access_key = '' 
-        self.secret_key = ''
+        self.access_key = 'x'
+        self.secret_key = 'x'
         self.subId = 'AF8339687' 
         self.method = 'GET' 
         self.limit = '10'
@@ -56,19 +56,16 @@ class Coupang:
         #print(resdata)
         return 0
 
-    def create_data(self, contents):
-        now_time = time.time()
-        tm = time.strftime('%Y-%m-%d_%I-%M-%S',time.localtime(now_time))
-        file_name = 'Data\\' + str(tm) + '.json'
-        
+    def create_data(self, contents, file_name):
         with open(file_name,'w',encoding='utf-8') as f:
             f.write(contents)
-        return 0
+        f.close
+        return file_name
 
 class tstory : 
 
     def __init__(self):
-        self.access_token = '' 
+        self.access_token = 'x'
 
     def twrite(self, contents):
 
@@ -92,10 +89,11 @@ class tstory :
                 'visibility': '0',
                 'category' : '990829',
                 'content': 
-                '<h1>' + contents["productName"] + '</h1>' + '  ' + '<h2>' + str(contents["productPrice"]) + '원!!' + '</h2>' + '</br>' + '</br>' +
+                '<h2>' + contents["productName"] + '</h2>' + '  ' + '<h3>' + str(contents["productPrice"]) + '원!!' + '</h3>' + '</br>' + '</br>' +
                 '<a href=\"' + contents['productUrl'] + '\">' + '<img src=\"' + contents['productImage'] + '\">' + '</a>' + '</br>' + '</br>' +
-                '<h2>' + contents["productName"] + '</h2>' + '</br>' + '</br>' +
-                '<h4>' + '파트너스 활동을 통해 일정액의 수수료를 제공받을 수 있음' + '</h4>',
+                '<h2>' + contents["productName"]+ '</h2>' + '</br>' + '</br>' +
+                '<h2>' + '<a href=\"' + contents['productUrl'] + '\">' + '구매하러 가기' + '</a>'  + '</h2>' + '</br>' + '</br>' +
+                '<h6>' + '파트너스 활동을 통해 일정액의 수수료를 제공받을 수 있음' + '</h6>',
                 
                 'tag': tag,
         }
@@ -131,7 +129,7 @@ class tstory :
 ###################################################
 
 
-category_list = ["1001","1010","1016","1017","1018","1019"]
+category_list = ["1001","1010","1016","1017","1018"]
 
 
 #/products/goldbox
@@ -145,7 +143,7 @@ category_list = ["1001","1010","1016","1017","1018","1019"]
 #data_json = json.loads(data_ori)
 #print(str(data_json['data'][0]))
 #Coupang().create_data(str(data_json['data']))
-"""
+
 contents_main = {}
 for a in category_list:
     contents_1 = []
@@ -153,14 +151,23 @@ for a in category_list:
     data_json = json.loads(data_ori)
     contents_main[a] = data_json['data']
 
-Coupang().create_data(str(contents_main))
+
+contents_ft1 = str(contents_main).replace("'", '"')
+contents_ft2 = contents_ft1.replace("True",'"True"')
+contents_ft3 = contents_ft2.replace("False", '"False"')
+#print(contents_ft3)
+now_time = time.time()
+tm = time.strftime('%Y-%m-%d_%I-%M-%S',time.localtime(now_time))
+file_name = 'Data\\best_' + str(tm) + '.json'
+Coupang().create_data(contents_ft3, file_name)
+
+
 """
-
-
-with open('Data\\sample.json','r', encoding='utf-8') as f:
+with open('Data\\sample10.json','r', encoding='utf-8') as f:
     contents_data = json.load(f) 
 f.close()
 
 for a in category_list:
-    for b in range(0, len(a)-1):
+    for b in range(0, len(contents_data[a])):
         tstory().twrite(contents_data[a][b])
+        """
